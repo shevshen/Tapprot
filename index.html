@@ -292,8 +292,7 @@
                 <div>
                     <label for="model-select" class="block text-xs font-semibold text-slate-300 mb-1.5">Gemini Modeli</label>
                     <select id="model-select" class="w-full bg-obsidian border border-slate-700 focus:border-gold-500 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 outline-none">
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (En Kararlı & Stabil Model)</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (En Kararlı Standart Model)</option>
                     </select>
                 </div>
 
@@ -827,7 +826,8 @@
                 return;
             }
 
-            const model = localStorage.getItem('gemini_tarot_model') || 'gemini-1.5-flash';
+            // GÜNCELLENMİŞ STABİL ENDPOINT YAPISI (v1 sürümü ve gemini-1.5-flash)
+            const model = 'gemini-1.5-flash';
             const systemInstruction = localStorage.getItem('gemini_tarot_system_prompt') || DEFAULT_SYSTEM_PROMPT;
 
             const cardsFormatted = state.selectedCards.map((c, idx) => {
@@ -853,7 +853,8 @@ Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşim
             loadingPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
             try {
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                // v1beta yerine resmi v1 kararlı endpoint yapısı kullanıldı
+                const endpoint = `https://generativelanguage.googleapis.com/v1/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
                 const response = await fetch(endpoint, {
                     method: 'POST',
