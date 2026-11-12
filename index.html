@@ -155,11 +155,9 @@
             </div>
         </section>
 
-        <!-- ADIM 2: Seçilen Kartlar (Masa) -->
+        <!-- ADIM 2: Seçilen Kartlar (Masa - Sticker Kaldırıldı) -->
         <section class="bg-midnight/90 border border-slate-800/90 rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
-            <img src="https://i.ibb.co/bjzKT6Sv/indir-12-removebg-preview-removebg-preview.png" alt="Dikey Sticker" class="absolute right-3 top-3 w-24 sm:w-32 h-48 sm:h-64 object-contain pointer-events-none drop-shadow-2xl z-20 opacity-90">
-
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-4 relative z-10 pr-12 sm:pr-16">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4 relative z-10">
                 <div class="flex items-center gap-2.5">
                     <span class="w-7 h-7 rounded-lg bg-gold-500/15 border border-gold-500/30 text-gold-400 font-bold text-sm flex items-center justify-center">2</span>
                     <div>
@@ -184,18 +182,18 @@
                 <span>HAZIRIM — KARTLARI YORUMLA</span>
             </button>
 
-            <!-- Yükleniyor Paneli (Hazırım'ın hemen altında) -->
+            <!-- Yükleniyor Paneli -->
             <div id="loading-panel" class="hidden bg-midnight/95 border border-gold-500/30 rounded-2xl p-8 text-center space-y-4">
                 <div class="w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-mystic-600/30 to-gold-500/30 border border-gold-400/50 flex items-center justify-center text-gold-400 mystic-loader">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 animate-spin" style="animation-duration: 6s;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                 </div>
                 <div>
-                    <h3 class="font-mystic text-lg text-gold-400 font-semibold">Kartların Enerjisi ve Kombinasyonları Okunuyor...</h3>
-                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Element dengeleri, düz/ters etkileşimler ve niyetin analiz ediliyor.</p>
+                    <h3 id="loading-title" class="font-mystic text-lg text-gold-400 font-semibold">Kartların Enerjisi ve Kombinasyonları Okunuyor...</h3>
+                    <p id="loading-sub" class="text-xs sm:text-sm text-slate-400 mt-1">Element dengeleri, düz/ters etkileşimler ve niyetin analiz ediliyor.</p>
                 </div>
             </div>
 
-            <!-- Sonuç Paneli (Hazırım'ın hemen altında) -->
+            <!-- Sonuç Paneli -->
             <div id="result-panel" class="hidden bg-midnight/95 border border-gold-500/40 rounded-2xl p-5 sm:p-8 shadow-2xl space-y-5">
                 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
                     <div class="flex items-center gap-2.5">
@@ -639,7 +637,6 @@
                 html += `</div>`;
             } 
             else if (sId === '12') {
-                // Üstte 6, altta 6 ortalanmış düzen
                 html += `<div class="flex flex-wrap justify-center gap-2 sm:gap-2.5 w-full">`;
                 for(let i=0; i<6; i++) html += createCardHTML(slots[i], i, 'w-28 sm:w-[14.8%]');
                 html += `</div><div class="flex flex-wrap justify-center gap-2 sm:gap-2.5 w-full">`;
@@ -647,7 +644,6 @@
                 html += `</div>`;
             }
             else if (sId === '12+1') {
-                // Üstte 7, altta 6 ortalanmış düzen
                 html += `<div class="flex flex-wrap justify-center gap-2 sm:gap-2 w-full">`;
                 for(let i=0; i<7; i++) html += createCardHTML(slots[i], i, 'w-24 sm:w-[13%]');
                 html += `</div><div class="flex flex-wrap justify-center gap-2 sm:gap-2.5 w-full">`;
@@ -728,7 +724,6 @@
                         finalHtml += `<div class="pt-4 pb-2 border-b border-slate-800/80 font-mystic text-xs font-bold text-gold-400 tracking-wider">${group.title}</div>`;
                     }
 
-                    // 4'erli satırlara böl (Büyük Arkana: 5x4 + 2 ortalı | Küçük Arkana: 3x4 + 2 ortalı)
                     for (let i = 0; i < group.cards.length; i += 4) {
                         const rowCards = group.cards.slice(i, i + 4);
                         if (rowCards.length === 4) {
@@ -736,7 +731,6 @@
                             rowCards.forEach(card => { finalHtml += renderSingleDeckCard(card, false); });
                             finalHtml += `</div>`;
                         } else {
-                            // Kalan 2 kart en altta ortalanmış olarak yerleşir
                             finalHtml += `<div class="flex flex-wrap justify-center gap-4 mb-4">`;
                             rowCards.forEach(card => {
                                 finalHtml += `<div class="w-[calc(50%-8px)] sm:w-[calc(25%-12px)]">${renderSingleDeckCard(card, true)}</div>`;
@@ -792,6 +786,8 @@
             `;
         }
 
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
         async function requestTarotReading() {
             const apiKey = localStorage.getItem('gemini_tarot_api_key')?.trim();
             if (!apiKey) {
@@ -829,32 +825,64 @@ Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşim
 
             const btn = document.getElementById('interpret-btn');
             const loadingPanel = document.getElementById('loading-panel');
+            const loadingTitle = document.getElementById('loading-title');
+            const loadingSub = document.getElementById('loading-sub');
             const resultPanel = document.getElementById('result-panel');
 
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
             resultPanel.classList.add('hidden');
+            loadingTitle.textContent = "Kartların Enerjisi ve Kombinasyonları Okunuyor...";
+            loadingSub.textContent = "Element dengeleri, düz/ters etkileşimler ve niyetin analiz ediliyor.";
             loadingPanel.classList.remove('hidden');
             loadingPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+            const payload = JSON.stringify({
+                contents: [{
+                    parts: [{ text: systemInstruction + "\n\n" + userPrompt }]
+                }]
+            });
+
+            // Yoğunluk (503) durumunda otomatik tekrar deneme döngüsü
+            const maxRetries = 3;
+            let successData = null;
+            let lastError = null;
+
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: payload
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        successData = data;
+                        break;
+                    } else {
+                        const errMsg = data?.error?.message || 'API isteği başarısız oldu.';
+                        // Yüksek talep veya geçici sunucu hatası ise tekrar dene
+                        if ((response.status === 503 || response.status === 429 || errMsg.toLowerCase().includes('high demand')) && attempt < maxRetries) {
+                            loadingTitle.textContent = `Sunucu Yoğun, Tekrar Bağlanılıyor (${attempt}/${maxRetries - 1})...`;
+                            loadingSub.textContent = "Google sunucuları şu an yoğun, birkaç saniye içinde otomatik tekrar deneniyor...";
+                            await sleep(2500 * attempt);
+                            continue;
+                        }
+                        throw new Error(errMsg);
+                    }
+                } catch (err) {
+                    lastError = err;
+                    if (attempt === maxRetries) break;
+                }
+            }
+
             try {
-                // Google'ın güncel standardı gemini-3.8-flash kullanıldı
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+                if (!successData) throw lastError || new Error('Sunucuya bağlanılamadı.');
 
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: systemInstruction + "\n\n" + userPrompt }]
-                        }]
-                    })
-                });
-
-                const data = await response.json();
-                if (!response.ok) throw new Error(data?.error?.message || 'API isteği başarısız oldu.');
-
-                const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                const aiText = successData?.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!aiText) throw new Error('Yapay zekadan boş yanıt döndü.');
 
                 state.lastRawMarkdown = aiText;
@@ -933,4 +961,3 @@ Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşim
     </script>
 </body>
 </html>
-
