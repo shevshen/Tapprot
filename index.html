@@ -6,11 +6,9 @@
     <title>Tapprot</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Marked.js -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script>
@@ -18,10 +16,7 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mystic: ['Cinzel', 'serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mystic: ['Cinzel', 'serif'] },
                     colors: {
                         obsidian: '#0b0d14',
                         midnight: '#131622',
@@ -34,39 +29,16 @@
         }
     </script>
     <style>
-        body {
-            background-color: #0b0d14;
-            color: #e2e8f0;
-            background-image: 
-                radial-gradient(circle at 15% 15%, rgba(124, 58, 237, 0.08) 0%, transparent 45%),
-                radial-gradient(circle at 85% 85%, rgba(212, 175, 55, 0.07) 0%, transparent 45%);
-            min-height: 100vh;
-        }
+        body { background-color: #0b0d14; color: #e2e8f0; min-height: 100vh; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #0b0d14; }
         ::-webkit-scrollbar-thumb { background: #2d334d; border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
-
-        .card-art-wrapper {
-            transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .is-reversed .card-art-wrapper {
-            transform: rotate(180deg);
-        }
-
-        .prose-tarot h1, .prose-tarot h2, .prose-tarot h3 {
-            font-family: 'Cinzel', serif;
-            color: #e5c158;
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
-            font-weight: 700;
-        }
+        .card-art-wrapper { transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .is-reversed .card-art-wrapper { transform: rotate(180deg); }
+        .prose-tarot h1, .prose-tarot h2, .prose-tarot h3 { font-family: 'Cinzel', serif; color: #e5c158; margin-top: 1.5rem; margin-bottom: 0.75rem; font-weight: 700; }
         .prose-tarot h2 { font-size: 1.25rem; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 0.35rem; }
         .prose-tarot p { margin-bottom: 1rem; line-height: 1.75; color: #cbd5e1; }
-        .prose-tarot ul, .prose-tarot ol { margin-bottom: 1rem; padding-left: 1.5rem; color: #cbd5e1; }
-        .prose-tarot li { margin-bottom: 0.5rem; line-height: 1.65; }
         .prose-tarot strong { color: #f8fafc; font-weight: 600; }
-        
         @keyframes pulseGlow {
             0%, 100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); transform: scale(1); }
             50% { box-shadow: 0 0 25px rgba(212, 175, 55, 0.5); transform: scale(1.04); }
@@ -175,7 +147,6 @@
             { id: 'PENTACLES', label: 'Tılsım (14)' }
         ];
 
-        // 78 Kartın Tam Listesi
         const TAROT_DECK = [
             { id: 'maj_0', name: '0. Deli', category: 'MAJOR', catLabel: 'Büyük Arkana', symbol: '✦', image: 'https://i.ibb.co/9khvtc5W/2020-Name-Nha-XC8qm-VHag-WFwyv-MB9-Gccwjulk-L8.webp' },
             { id: 'maj_1', name: 'I. Büyücü', category: 'MAJOR', catLabel: 'Büyük Arkana', symbol: '✦', image: 'https://i.ibb.co/mFg1q0fm/2020-Name-LVtn7-J7xbfx-Jg-ZOhexc-K8-SBr6r-Msu2.webp' },
@@ -413,8 +384,11 @@
             const prompt = `Niyetim: "${intention}"\nÇektiğim Kartlar:\n${cardsText}\nLütfen bu kartları niyetim doğrultusunda element dengeleri ve kombinasyonlarıyla dürüstçe yorumla.`;
 
             try {
-                // v1 endpoint ve gemini-1.5-flash kullanarak en stabil istemci isteği
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                // CORS engeline takılmamak için ücretsiz proxy köprüsü kullanıldı
+                const targetUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                const proxyUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(targetUrl);
+
+                const res = await fetch(proxyUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
