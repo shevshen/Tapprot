@@ -828,47 +828,49 @@ Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşim
             const loadingTitle = document.getElementById('loading-title');
             const loadingSub = document.getElementById('loading-sub');
             const resultPanel = document.getElementById('result-panel');
+            const readingOutput = document.getElementById('reading-output');
 
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
             resultPanel.classList.add('hidden');
-            loadingTitle.textContent = "Kartların Enerjisi ve Kombinasyonları Okunuyor...";
-            loadingSub.textContent = "Element dengeleri, düz/ters etkileşimler ve niyetin analiz ediliyor.";
+            loadingTitle.textContent = "Kartların Enerjisi Okunuyor...";
+            loadingSub.textContent = "Yorum hazırlanıyor, saniyeler içinde akmaya başlayacak...";
             loadingPanel.classList.remove('hidden');
             loadingPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+            // Canlı akış (SSE) endpoint'i - kelimeler üretildikçe anında ekrana düşer
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
+            
             const payload = JSON.stringify({
                 contents: [{
                     parts: [{ text: systemInstruction + "\n\n" + userPrompt }]
-                }]
+                }],
+                generationConfig: {
+                    thinkingConfig: { thinkingBudget: 0 } // Arka plan beklemesini kapatır, anında yanıt başlatır
+                }
             });
 
-            // Yoğunluk (503) durumunda otomatik tekrar deneme döngüsü
             const maxRetries = 3;
-            let successData = null;
+            let response = null;
             let lastError = null;
 
             for (let attempt = 1; attempt <= maxRetries; attempt++) {
                 try {
-                    const response = await fetch(endpoint, {
+                    const res = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: payload
                     });
 
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        successData = data;
+                    if (res.ok) {
+                        response = res;
                         break;
                     } else {
-                        const errMsg = data?.error?.message || 'API isteği başarısız oldu.';
-                        // Yüksek talep veya geçici sunucu hatası ise tekrar dene
-                        if ((response.status === 503 || response.status === 429 || errMsg.toLowerCase().includes('high demand')) && attempt < maxRetries) {
+                        const errData = await res.json().catch(() => ({}));
+                        const errMsg = errData?.error?.message || 'API isteği başarısız oldu.';
+                        if ((res.status === 503 || res.status === 429 || errMsg.toLowerCase().includes('high demand')) && attempt < maxRetries) {
                             loadingTitle.textContent = `Sunucu Yoğun, Tekrar Bağlanılıyor (${attempt}/${maxRetries - 1})...`;
-                            loadingSub.textContent = "Google sunucuları şu an yoğun, birkaç saniye içinde otomatik tekrar deneniyor...";
-                            await sleep(2500 * attempt);
+                            await sleep(1500);
                             continue;
                         }
                         throw new Error(errMsg);
@@ -880,12 +882,7 @@ Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşim
             }
 
             try {
-                if (!successData) throw lastError || new Error('Sunucuya bağlanılamadı.');
-
-                const aiText = successData?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!aiText) throw new Error('Yapay zekadan boş yanıt döndü.');
-
-                state.lastRawMarkdown = aiText;
+                if (!response) throw lastError || new Error('Sunucuya bağlanılamadı.');
 
                 const cardBadges = state.selectedCards.map((c, i) => {
                     const num = (state.spreadId === '12+1' && i === 12) ? '+1' : (i + 1);
@@ -899,10 +896,43 @@ Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşim
                     <div class="pt-1"><strong class="text-gold-400">Açılan Kartlar:</strong><br><div class="mt-1">${cardBadges}</div></div>
                 `;
 
-                document.getElementById('reading-output').innerHTML = marked.parse(aiText);
                 loadingPanel.classList.add('hidden');
+                readingOutput.innerHTML = '';
                 resultPanel.classList.remove('hidden');
                 resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                // Gelen veri akışını kelime kelime ekrana bas
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                let fullMarkdown = '';
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); 
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const jsonStr = line.slice(6).trim();
+                            if (!jsonStr || jsonStr === '[DONE]') continue;
+                            try {
+                                const parsed = JSON.parse(jsonStr);
+                                const chunkText = parsed?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                                if (chunkText) {
+                                    fullMarkdown += chunkText;
+                                    readingOutput.innerHTML = marked.parse(fullMarkdown);
+                                }
+                            } catch (e) {}
+                        }
+                    }
+                }
+
+                if (!fullMarkdown) throw new Error('Yapay zekadan boş yanıt döndü.');
+                state.lastRawMarkdown = fullMarkdown;
 
             } catch (error) {
                 console.error('Tarot API Hatası:', error);
@@ -913,7 +943,6 @@ Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşim
                 btn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
-
         function copyReading() {
             if (!state.lastRawMarkdown) return;
             navigator.clipboard.writeText(state.lastRawMarkdown).then(() => {
