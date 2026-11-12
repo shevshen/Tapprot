@@ -6,11 +6,11 @@
     <title>Tapprot</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter & Cinzel (Mistik başlıklar için) -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Marked.js (Gemini'nin Markdown yanıtlarını şık göstermek için) -->
+    <!-- Marked.js -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script>
@@ -26,15 +26,8 @@
                         obsidian: '#0b0d14',
                         midnight: '#131622',
                         cardbg: '#1a1e2e',
-                        gold: {
-                            400: '#e5c158',
-                            500: '#d4af37',
-                            600: '#b59224',
-                        },
-                        mystic: {
-                            500: '#7c3aed',
-                            600: '#6d28d9',
-                        }
+                        gold: { 400: '#e5c158', 500: '#d4af37', 600: '#b59224' },
+                        mystic: { 500: '#7c3aed', 600: '#6d28d9' }
                     }
                 }
             }
@@ -49,24 +42,11 @@
                 radial-gradient(circle at 85% 85%, rgba(212, 175, 55, 0.07) 0%, transparent 45%);
             min-height: 100vh;
         }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0b0d14; }
+        ::-webkit-scrollbar-thumb { background: #2d334d; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
 
-        /* Özel Kaydırma Çubuğu */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0b0d14;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #2d334d;
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #d4af37;
-        }
-
-        /* Kart Ters Çevirme Animasyonu */
         .card-art-wrapper {
             transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -74,7 +54,6 @@
             transform: rotate(180deg);
         }
 
-        /* AI Yorumu Tipografi Stilleri */
         .prose-tarot h1, .prose-tarot h2, .prose-tarot h3 {
             font-family: 'Cinzel', serif;
             color: #e5c158;
@@ -83,240 +62,110 @@
             font-weight: 700;
         }
         .prose-tarot h2 { font-size: 1.25rem; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 0.35rem; }
-        .prose-tarot h3 { font-size: 1.1rem; color: #c4b5fd; }
         .prose-tarot p { margin-bottom: 1rem; line-height: 1.75; color: #cbd5e1; }
         .prose-tarot ul, .prose-tarot ol { margin-bottom: 1rem; padding-left: 1.5rem; color: #cbd5e1; }
         .prose-tarot li { margin-bottom: 0.5rem; line-height: 1.65; }
-        .prose-tarot ul li { list-style-type: disc; }
-        .prose-tarot ol li { list-style-type: decimal; }
         .prose-tarot strong { color: #f8fafc; font-weight: 600; }
-        .prose-tarot blockquote {
-            border-left: 3px solid #d4af37;
-            padding-left: 1rem;
-            font-style: italic;
-            color: #94a3b8;
-            margin: 1rem 0;
-            background: rgba(212, 175, 55, 0.05);
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-            border-radius: 0 0.5rem 0.5rem 0;
-        }
-
-        /* Mistik Yükleme Animasyonu */
+        
         @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.2), 0 0 30px rgba(124, 58, 237, 0.2); transform: scale(1); }
-            50% { box-shadow: 0 0 25px rgba(212, 175, 55, 0.5), 0 0 50px rgba(124, 58, 237, 0.4); transform: scale(1.04); }
+            0%, 100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); transform: scale(1); }
+            50% { box-shadow: 0 0 25px rgba(212, 175, 55, 0.5); transform: scale(1.04); }
         }
-        .mystic-loader {
-            animation: pulseGlow 2.5s infinite ease-in-out;
-        }
+        .mystic-loader { animation: pulseGlow 2.5s infinite ease-in-out; }
     </style>
 </head>
-<body class="antialiased selection:bg-gold-500/30 selection:text-gold-400">
+<body class="antialiased">
 
-    <!-- Bildirim Toast Kutusu -->
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4"></div>
 
-    <!-- Üst Başlık (Header) -->
-    <header class="sticky top-0 z-30 backdrop-blur-md bg-obsidian/80 border-b border-slate-800/80">
+    <header class="sticky top-0 z-30 backdrop-blur-md bg-obsidian/80 border-b border-slate-800">
         <div class="max-w-4xl mx-auto px-4 py-3.5 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <img src="https://i.ibb.co/hFYRKMpw/journal-stickers-removebg-preview.png" alt="Logo" class="w-10 h-10 rounded-xl object-cover border border-gold-500/40 shadow-lg">
-                <div>
-                    <h1 class="font-mystic text-lg sm:text-xl font-bold tracking-wide text-slate-100 flex items-center gap-2">
-                        Tapprot
-                    </h1>
-                    <p class="text-xs text-slate-400 hidden sm:block">Objektif, dürüst ve kombinasyon odaklı kişisel yorumcun</p>
-                </div>
+                <h1 class="font-mystic text-lg font-bold text-slate-100">Tapprot</h1>
             </div>
-
             <div class="flex items-center gap-2">
-                <!-- API Durum Göstergesi -->
-                <span id="api-status-badge" onclick="openSettings()" class="cursor-pointer text-xs px-2.5 py-1.5 rounded-lg border flex items-center gap-1.5 transition">
+                <span id="api-status-badge" onclick="openSettings()" class="cursor-pointer text-xs px-2.5 py-1.5 rounded-lg border flex items-center gap-1.5 bg-obsidian border-slate-700 text-slate-300">
                     <span class="w-2 h-2 rounded-full bg-rose-500" id="api-status-dot"></span>
-                    <span id="api-status-text" class="hidden sm:inline">API Anahtarı Eksik</span>
+                    <span id="api-status-text">API Ayarla</span>
                 </span>
-
-                <!-- Ayarlar Butonu -->
-                <button onclick="openSettings()" title="Ayarlar ve Sistem Talimatı" class="p-2.5 rounded-xl bg-cardbg hover:bg-slate-800 border border-slate-700/70 text-slate-300 hover:text-gold-400 transition active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                </button>
+                <button onclick="openSettings()" class="p-2.5 rounded-xl bg-cardbg border border-slate-700 text-slate-300 hover:text-gold-400">⚙</button>
             </div>
         </div>
     </header>
 
-    <!-- Ana İçerik -->
     <main class="max-w-4xl mx-auto px-4 py-6 space-y-6 pb-20">
-
-        <!-- ADIM 1: Niyet ve Açılım Sayısı -->
-        <section class="bg-midnight/90 border border-slate-800/90 rounded-2xl p-5 sm:p-6 shadow-xl">
+        <!-- ADIM 1 -->
+        <section class="bg-midnight/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
             <div class="flex items-center gap-2.5 mb-4">
                 <span class="w-7 h-7 rounded-lg bg-gold-500/15 border border-gold-500/30 text-gold-400 font-bold text-sm flex items-center justify-center">1</span>
-                <h2 class="font-mystic text-base sm:text-lg font-semibold text-slate-100">Niyetin</h2>
+                <h2 class="font-mystic text-base font-semibold text-slate-100">Niyetin</h2>
             </div>
-
-            <div class="space-y-4">
-                <div>
-                    <label for="intention-input" class="block text-xs font-medium text-slate-400 mb-1.5">Niyetin / Sorduğun Soru Nedir?</label>
-                    
-                    <div class="relative">
-                        <textarea id="intention-input" rows="2" placeholder="Örn: Önümüzdeki 3 ay içinde kariyerimde beni bekleyen gelişmeler neler?" class="w-full bg-obsidian/90 border border-slate-700/80 focus:border-gold-500 focus:ring-1 focus:ring-gold-500 rounded-xl p-3.5 pr-20 text-sm text-slate-100 placeholder-slate-500 outline-none transition resize-y"></textarea>
-                        
-                        <img src="https://i.ibb.co/V0Bmj4M6/indir-10-removebg-preview.png" alt="Sticker" class="absolute right-0 -bottom-0 w-20 h-20 object-contain pointer-events-none drop-shadow-xl z-10">
-                    </div>
-                </div>
-
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                    <div>
-                        <span class="block text-xs font-medium text-slate-400 mb-2">Kaç Kartlık Açılım Yapıyorsun?</span>
-                        <div class="flex flex-wrap gap-2" id="spread-count-buttons"></div>
-                    </div>
-
-                    <div class="bg-obsidian/80 border border-slate-800 rounded-xl px-4 py-2.5 flex items-center justify-between sm:justify-end gap-3 self-start sm:self-end">
-                        <span class="text-xs text-slate-400">Masa Durumu:</span>
-                        <span id="selection-counter" class="text-sm font-semibold text-gold-400">0 / 3 Kart</span>
-                    </div>
-                </div>
-            </div>
+            <textarea id="intention-input" rows="2" placeholder="Niyetiniz veya sorunuz..." class="w-full bg-obsidian border border-slate-700 rounded-xl p-3 text-sm text-slate-100 outline-none"></textarea>
+            <div class="mt-4 flex flex-wrap gap-2" id="spread-count-buttons"></div>
         </section>
 
-        <!-- ADIM 2: Seçilen Kartlar (Masa - Dinamik Düzen) + DİKEY DİKDÖRTGEN STİCKER -->
-        <section class="bg-midnight/90 border border-slate-800/90 rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
-            
-            <!-- Sağ Üst Köşedeki Dikey Dikdörtgen Sticker -->
-            <img src="https://i.ibb.co/bjzKT6Sv/indir-12-removebg-preview-removebg-preview.png" alt="Dikey Sticker" class="absolute right-3 top-3 w-24 sm:w-32 h-48 sm:h-64 object-contain pointer-events-none drop-shadow-2xl z-20 opacity-90">
-
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-4 relative z-10 pr-12 sm:pr-16">
+        <!-- ADIM 2 -->
+        <section class="bg-midnight/90 border border-slate-800 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2.5">
                     <span class="w-7 h-7 rounded-lg bg-gold-500/15 border border-gold-500/30 text-gold-400 font-bold text-sm flex items-center justify-center">2</span>
-                    <div>
-                        <h2 class="font-mystic text-base sm:text-lg font-semibold text-slate-100">Açılan Kartlar</h2>
-                        <p class="text-xs text-slate-400">Ters gelen kartların üzerine veya <span class="text-amber-400">Ters Çevir</span> butonuna tıkla.</p>
-                    </div>
+                    <h2 class="font-mystic text-base font-semibold text-slate-100">Açılan Kartlar (<span id="selection-counter">0 / 3</span>)</h2>
                 </div>
-
-                <button id="clear-table-btn" onclick="clearSelectedCards()" class="hidden text-xs px-3 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                    Masayı Temizle
-                </button>
+                <button onclick="clearSelectedCards()" class="text-xs text-rose-400 hover:underline">Masayı Temizle</button>
             </div>
-
-            <!-- Dinamik Kart Masası Konteyneri -->
-            <div id="selected-cards-container" class="flex flex-col items-center gap-6 py-2 relative z-10"></div>
+            <div id="selected-cards-container" class="flex flex-wrap gap-4 justify-center py-2"></div>
         </section>
 
-        <!-- HAZIRIM BUTONU -->
-        <section class="space-y-6">
-            <button id="interpret-btn" onclick="requestTarotReading()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-gold-600 via-gold-500 to-amber-500 hover:from-gold-500 hover:to-amber-400 text-obsidian font-mystic font-bold text-base sm:text-lg tracking-wider shadow-lg shadow-gold-500/20 transition transform active:scale-[0.99] flex items-center justify-center gap-3 cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-                <span>HAZIRIM — KARTLARI YORUMLA</span>
-            </button>
-        </section>
+        <button onclick="requestTarotReading()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-gold-600 via-gold-500 to-amber-500 text-obsidian font-mystic font-bold text-base shadow-lg cursor-pointer">
+            HAZIRIM — KARTLARI YORUMLA
+        </button>
 
-        <!-- ADIM 3: 78 Kartlık Deste Seçici -->
-        <section class="bg-midnight/90 border border-slate-800/90 rounded-2xl p-5 sm:p-6 shadow-xl">
+        <!-- ADIM 3 -->
+        <section class="bg-midnight/90 border border-slate-800 rounded-2xl p-5 shadow-xl">
             <div class="flex items-center gap-2.5 mb-4">
                 <span class="w-7 h-7 rounded-lg bg-gold-500/15 border border-gold-500/30 text-gold-400 font-bold text-sm flex items-center justify-center">3</span>
-                <h2 class="font-mystic text-base sm:text-lg font-semibold text-slate-100">Desteden Kart Seç (78 Kart)</h2>
+                <h2 class="font-mystic text-base font-semibold text-slate-100">78 Kartlık Deste</h2>
             </div>
-
-            <div class="space-y-3 mb-4">
-                <div class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    <input type="text" id="card-search-input" oninput="filterDeck()" placeholder="Kart adı ara... (örn: Kılıç Üçlüsü, Kule, Güneş)" class="w-full bg-obsidian border border-slate-700/80 focus:border-gold-500 rounded-xl pl-10 pr-10 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition">
-                    <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1">✕</button>
-                </div>
-
-                <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar" id="category-tabs"></div>
-            </div>
-
-            <div id="deck-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-h-[680px] overflow-y-auto pr-1.5"></div>
+            <input type="text" id="card-search-input" oninput="filterDeck()" placeholder="Kart ara..." class="w-full bg-obsidian border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 mb-3 outline-none">
+            <div class="flex gap-2 overflow-x-auto pb-2" id="category-tabs"></div>
+            <div id="deck-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-h-[500px] overflow-y-auto pr-1"></div>
         </section>
 
-        <!-- Yükleniyor ve Yorum Sonuç Alanı -->
-        <section class="space-y-6">
-            <div id="loading-panel" class="hidden bg-midnight/95 border border-gold-500/30 rounded-2xl p-8 text-center space-y-4">
-                <div class="w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-mystic-600/30 to-gold-500/30 border border-gold-400/50 flex items-center justify-center text-gold-400 mystic-loader">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 animate-spin" style="animation-duration: 6s;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                </div>
-                <div>
-                    <h3 class="font-mystic text-lg text-gold-400 font-semibold">Kartların Enerjisi ve Kombinasyonları Okunuyor...</h3>
-                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Element dengeleri, düz/ters etkileşimler ve niyetin analiz ediliyor.</p>
-                </div>
+        <!-- YÜKLENİYOR VE SONUÇ -->
+        <div id="loading-panel" class="hidden bg-midnight border border-gold-500/30 rounded-2xl p-8 text-center space-y-3">
+            <div class="w-12 h-12 mx-auto rounded-full border-2 border-gold-400 border-t-transparent animate-spin"></div>
+            <h3 class="font-mystic text-gold-400 font-semibold">Kartlar Okunuyor...</h3>
+        </div>
+
+        <div id="result-panel" class="hidden bg-midnight border border-gold-500/40 rounded-2xl p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h2 class="font-mystic text-lg font-bold text-gold-400">Tarot Yorumun</h2>
+                <button onclick="copyReading()" class="text-xs px-3 py-1.5 rounded-lg bg-cardbg border border-slate-700 text-slate-200">Yorumu Kopyala</button>
             </div>
-
-            <div id="result-panel" class="hidden bg-midnight/95 border border-gold-500/40 rounded-2xl p-5 sm:p-8 shadow-2xl space-y-5">
-                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
-                    <div class="flex items-center gap-2.5">
-                        <span class="text-gold-400 text-xl">✦</span>
-                        <h2 class="font-mystic text-lg sm:text-xl font-bold text-gold-400">Tarot Yorumun</h2>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="copyReading()" class="text-xs px-3.5 py-2 rounded-xl bg-cardbg hover:bg-slate-800 border border-slate-700 text-slate-200 transition flex items-center gap-1.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gold-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                            Yorumu Kopyala
-                        </button>
-                        <button onclick="resetAllForNewReading()" class="text-xs px-3.5 py-2 rounded-xl bg-mystic-600/20 hover:bg-mystic-600/30 border border-mystic-500/40 text-purple-300 transition flex items-center gap-1.5">
-                            Yeni Açılım Yap
-                        </button>
-                    </div>
-                </div>
-
-                <div id="reading-summary-banner" class="bg-obsidian/80 border border-slate-800/80 rounded-xl p-3.5 text-xs text-slate-300 space-y-1.5"></div>
-                <div id="reading-output" class="prose-tarot text-sm sm:text-base"></div>
-            </div>
-        </section>
-
+            <div id="reading-output" class="prose-tarot text-sm sm:text-base"></div>
+        </div>
     </main>
 
     <!-- AYARLAR MODALI -->
-    <div id="settings-modal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-midnight border border-slate-700/90 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 class="font-mystic text-lg font-bold text-gold-400 flex items-center gap-2">
-                    <span>⚙</span> Uygulama & AI Ayarları
-                </h3>
-                <button onclick="closeSettings()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">✕</button>
+    <div id="settings-modal" class="fixed inset-0 hidden bg-black/75 flex items-center justify-center p-4 z-50">
+        <div class="bg-midnight border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <h3 class="font-mystic font-bold text-gold-400">Gemini API Ayarları</h3>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">API Anahtarınız (AQ... veya AIza...)</label>
+                <input type="password" id="api-key-input" placeholder="Anahtarınızı buraya yapıştırın..." class="w-full bg-obsidian border border-slate-700 rounded-xl p-3 text-sm text-slate-100 outline-none">
             </div>
-
-            <div class="space-y-4">
-                <div>
-                    <label for="api-key-input" class="block text-xs font-semibold text-slate-300 mb-1.5">Gemini API Anahtarı *</label>
-                    <input type="password" id="api-key-input" placeholder="AIzaSy..." class="w-full bg-obsidian border border-slate-700 focus:border-gold-500 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 outline-none">
-                    <p class="text-[11px] text-slate-400 mt-1">Anahtarın yalnızca senin tarayıcında saklanır.</p>
-                </div>
-
-                <div>
-                    <label for="model-select" class="block text-xs font-semibold text-slate-300 mb-1.5">Gemini Modeli</label>
-                    <select id="model-select" class="w-full bg-obsidian border border-slate-700 focus:border-gold-500 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 outline-none">
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (En Kararlı Standart Model)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label for="system-prompt-input" class="block text-xs font-semibold text-slate-300">Sistem Talimatı (Otomatik Karakter)</label>
-                        <button onclick="resetDefaultPrompt()" class="text-[11px] text-gold-400 hover:underline">Varsayılana Dön</button>
-                    </div>
-                    <textarea id="system-prompt-input" rows="6" class="w-full bg-obsidian border border-slate-700 focus:border-gold-500 rounded-xl p-3 text-xs leading-relaxed text-slate-200 outline-none resize-y"></textarea>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-800">
-                <button onclick="closeSettings()" class="px-4 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:bg-slate-800 transition">Vazgeç</button>
-                <button onclick="saveSettings()" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-gold-500 hover:bg-gold-400 text-obsidian transition shadow-md">Ayarları Kaydet</button>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeSettings()" class="px-4 py-2 text-xs text-slate-300">Vazgeç</button>
+                <button onclick="saveSettings()" class="px-4 py-2 text-xs bg-gold-500 text-obsidian font-bold rounded-xl">Kaydet</button>
             </div>
         </div>
     </div>
 
     <script>
-        const DEFAULT_SYSTEM_PROMPT = `Sen deneyimli, keskin sezgili ve tamamen objektif bir tarot yorumcususun. Kullanıcının niyetine ve çektiği kartlara göre yorum yaparken şu kurallara kesinlikle uy: Tamamen dürüst ve objektif şekilde yorumla. Asla gereksiz yere pembe tablo çizme, duymak isteneni değil kartların gösterdiği gerçeği söyle. Ancak 'dürüstlük' adı altında her şeyi felaket senaryosuna ve negatife de yorma; dengeli, gerçekçi ve yapıcı ol. Kartları tek tek ezbere sıralamak yerine kart kombinasyonlarına, birbirleriyle olan etkileşimlerine, element dengelerine ve genel enerji akışına odaklan. Kartlar ne diyorsa doğrudan onu söyle.`;
+        const DEFAULT_SYSTEM_PROMPT = `Sen deneyimli, keskin sezgili ve tamamen objektif bir tarot yorumcususun. Kullanıcının niyetine ve çektiği kartlara göre yorum yaparken dürüst ve dengeli ol. Kart kombinasyonlarına ve enerji akışına odaklan.`;
 
-        const SPREAD_OPTIONS = [1, 3, 5, 7, 10, 12];
-
+        const SPREAD_OPTIONS = [1, 3, 5, 7, 10];
         const CATEGORIES = [
             { id: 'ALL', label: 'Tümü (78)' },
             { id: 'MAJOR', label: 'Büyük Arkana (22)' },
@@ -326,6 +175,7 @@
             { id: 'PENTACLES', label: 'Tılsım (14)' }
         ];
 
+        // 78 Kartın Tam Listesi
         const TAROT_DECK = [
             { id: 'maj_0', name: '0. Deli', category: 'MAJOR', catLabel: 'Büyük Arkana', symbol: '✦', image: 'https://i.ibb.co/9khvtc5W/2020-Name-Nha-XC8qm-VHag-WFwyv-MB9-Gccwjulk-L8.webp' },
             { id: 'maj_1', name: 'I. Büyücü', category: 'MAJOR', catLabel: 'Büyük Arkana', symbol: '✦', image: 'https://i.ibb.co/mFg1q0fm/2020-Name-LVtn7-J7xbfx-Jg-ZOhexc-K8-SBr6r-Msu2.webp' },
@@ -347,9 +197,9 @@
             { id: 'maj_17', name: 'XVII. Yıldız', category: 'MAJOR', catLabel: 'Büyük Arkana', symbol: '✦', image: 'https://i.ibb.co/V0skmG70/2020-Name-TRkvof-Bo-G6-Jx-Ba-PRG5gvm-EES3-V3sll.webp' },
             { id: 'maj_18', name: 'XVIII. Ay', category: 'MAJOR', catLabel: 'Büyük Arkana', symbol: '✦', image: 'https://i.ibb.co/7dHFVpYm/2020-Name-n-Kap7j-Xuy-Vm-EJh-J3-Lm3-RNk-RSfa-RHc2.webp' },
             { id: 'maj_19', name: 'XIX. Güneş', category: 'MAJOR', catLabel: 'Büyük Arkana', symbol: '✦', image: 'https://i.ibb.co/PZ21zZc7/2020-Name-w-Om-EG5cxbt-WFq-GWKB-Fj-Hk1-Lz-HJJe9.webp' },
-            { id: 'maj_20', name: 'XX. Mahkeme (Uyanış)', category: 'MAJOR', catLabel: 'Büyük Arkana', symbol: '✦', image: 'https://i.ibb.co/cXTpBwVV/2020-Name-Wzvjxoc-Cs-QFUOp-TUk5-Uctpn9e-WGx-OK.webp' },
+            { id: 'maj_20', name: 'XX. Mahkeme', category: 'MAJOR', catLabel: 'Büyük Arkana', symbol: '✦', image: 'https://i.ibb.co/cXTpBwVV/2020-Name-Wzvjxoc-Cs-QFUOp-TUk5-Uctpn9e-WGx-OK.webp' },
             { id: 'maj_21', name: 'XXI. Dünya', category: 'MAJOR', catLabel: 'Büyük Arkana', symbol: '✦', image: 'https://i.ibb.co/rR29gcf7/2020-Name-3tv-JVdw-S24-YXZWf7-X3-Eix-PTE3e-BJLy.webp' },
-
+            // Değnekler
             { id: 'wands_1', name: 'Değnek Ası', category: 'WANDS', catLabel: 'Değnek (Ateş)', symbol: '🔥', image: 'https://i.ibb.co/fzgb42Hw/202020-Name20-Dvhl-KV7j-Ubmt-R4tj2u0o2wu-Lk-Qzr-Oe.webp' },
             { id: 'wands_2', name: 'Değnek İkilisi', category: 'WANDS', catLabel: 'Değnek (Ateş)', symbol: '🔥', image: 'https://i.ibb.co/qYLDYzM7/202020-Name20-Rx8l-E44xu-K0-Lnb-H-tqk8u6n5-Q9-OVs8.webp' },
             { id: 'wands_3', name: 'Değnek Üçlüsü', category: 'WANDS', catLabel: 'Değnek (Ateş)', symbol: '🔥', image: 'https://i.ibb.co/FLDnQvBZ/202020-Name20-rv43g-KDy-B1-Km5o2hy1-X-QL1af4i-Hve.webp' },
@@ -364,7 +214,7 @@
             { id: 'wands_12', name: 'Değnek Şövalyesi', category: 'WANDS', catLabel: 'Değnek (Ateş)', symbol: '🔥', image: 'https://i.ibb.co/ymTFzq7M/202020-Name20-2-Gz-Bc-Rekk-Flogog-Gdb-FL2ok-SDmf-JS6.webp' },
             { id: 'wands_13', name: 'Değnek Kraliçesi', category: 'WANDS', catLabel: 'Değnek (Ateş)', symbol: '🔥', image: 'https://i.ibb.co/qLSm84Zv/202020-Name20-LYK7-OX3-Ybx-FLH3rh-Ey-U537-XE6qsw-G.webp' },
             { id: 'wands_14', name: 'Değnek Kralı', category: 'WANDS', catLabel: 'Değnek (Ateş)', symbol: '🔥', image: 'https://i.ibb.co/qM5VyT53/202020-Name20-4-Un8d-Kb7-BJt2-X94mfpzgrzjkzhq-Tf3.webp' },
-
+            // Kupalar
             { id: 'cups_1', name: 'Kupa Ası', category: 'CUPS', catLabel: 'Kupa (Su)', symbol: '🏆', image: 'https://i.ibb.co/5WQrDtL9/202020-Name20-3-Nac-G2k-Gtuz-XR-6-Nx-Ns-ZVc75-JO71-W6.webp' },
             { id: 'cups_2', name: 'Kupa İkilisi', category: 'CUPS', catLabel: 'Kupa (Su)', symbol: '🏆', image: 'https://i.ibb.co/35JW03gx/202020-Name20-UXqtne1-QK1-Cc-CMcnxuz9kc-T23lb4x-L.webp' },
             { id: 'cups_3', name: 'Kupa Üçlüsü', category: 'CUPS', catLabel: 'Kupa (Su)', symbol: '🏆', image: 'https://i.ibb.co/WNgWcStd/202020-Name20-Zq-ANf6cj2mu-A1-SR1k-Ev-YVmr-MO4-Ds6-U.webp' },
@@ -379,7 +229,7 @@
             { id: 'cups_12', name: 'Kupa Şövalyesi', category: 'CUPS', catLabel: 'Kupa (Su)', symbol: '🏆', image: 'https://i.ibb.co/67Q0n8gC/202020-Name20-Egf-Aao-HQd07-QYNu01x70-PE9-Yu-WYxg-K.webp' },
             { id: 'cups_13', name: 'Kupa Kraliçesi', category: 'CUPS', catLabel: 'Kupa (Su)', symbol: '🏆', image: 'https://i.ibb.co/Df722T7V/202020-Name20-yig-Vzqda8-LFw-RM81vy-FHdr-X-a-GRgvv.webp' },
             { id: 'cups_14', name: 'Kupa Kralı', category: 'CUPS', catLabel: 'Kupa (Su)', symbol: '🏆', image: 'https://i.ibb.co/p9m3f9T/202020-Name20-wt-OP-b-Pa1-D35-Gfw1dy-L5gi-TJSMw-k-F.webp' },
-
+            // Kılıçlar
             { id: 'swords_1', name: 'Kılıç Ası', category: 'SWORDS', catLabel: 'Kılıç (Hava)', symbol: '⚔️', image: 'https://i.ibb.co/dwHJmkgd/202020-Name20-w2-Axr-HShqzk-Fww2-Do-Za-Dn39-L6-P0qm-B.webp' },
             { id: 'swords_2', name: 'Kılıç İkilisi', category: 'SWORDS', catLabel: 'Kılıç (Hava)', symbol: '⚔️', image: 'https://i.ibb.co/zTmBVYsX/202020-Name20-c5-UFPALw-Tw-Aud-RG-7cv-Z2-ETn-Uc-GLM.webp' },
             { id: 'swords_3', name: 'Kılıç Üçlüsü', category: 'SWORDS', catLabel: 'Kılıç (Hava)', symbol: '⚔️', image: 'https://i.ibb.co/Wr2PKHv/202020-Name20-7l-Hn-UYZ73-Vad-ROEgz-FGnu-OFxjx-QLM0.webp' },
@@ -394,7 +244,7 @@
             { id: 'swords_12', name: 'Kılıç Şövalyesi', category: 'SWORDS', catLabel: 'Kılıç (Hava)', symbol: '⚔️', image: 'https://i.ibb.co/qLxnkdtX/202020-Name20-e4-WHgw-EOXbb1u-Ckc-XAoxz-Fmff-X6-QBE.webp' },
             { id: 'swords_13', name: 'Kılıç Kraliçesi', category: 'SWORDS', catLabel: 'Kılıç (Hava)', symbol: '⚔️', image: 'https://i.ibb.co/4wMp5FrG/202020-Name20-duh-Qs7og5-R99-Oi-YEG5k-RP7cr04-O-0.webp' },
             { id: 'swords_14', name: 'Kılıç Kralı', category: 'SWORDS', catLabel: 'Kılıç (Hava)', symbol: '⚔️', image: 'https://i.ibb.co/SD10HNFp/202020-Name20-Jst-Hvrd-Pse-Nl6-Ne-Ol-J9v-Yu-V-o-ADt-Sl.webp' },
-
+            // Tılsımlar
             { id: 'pentacles_1', name: 'Tılsım Ası', category: 'PENTACLES', catLabel: 'Tılsım (Toprak)', symbol: '🪙', image: 'https://i.ibb.co/HLHVGnXZ/202020-Name20-O-1-Swkc-U18-QBYys-Mdd-Qk-PWQdb-Zhao9.webp' },
             { id: 'pentacles_2', name: 'Tılsım İkilisi', category: 'PENTACLES', catLabel: 'Tılsım (Toprak)', symbol: '🪙', image: 'https://i.ibb.co/m5ZjjgnX/202020-Name20-Fhe-CQV6-Emmc2-Lkazw8-RQhbyipsj-Jax.webp' },
             { id: 'pentacles_3', name: 'Tılsım Üçlüsü', category: 'PENTACLES', catLabel: 'Tılsım (Toprak)', symbol: '🪙', image: 'https://i.ibb.co/JW36DL56/202020-Name20-g-On-Jlta3-s-Lo5-Ye-Sf-Tqv-HRNWwdbucm.webp' },
@@ -411,546 +261,190 @@
             { id: 'pentacles_14', name: 'Tılsım Kralı', category: 'PENTACLES', catLabel: 'Tılsım (Toprak)', symbol: '🪙', image: 'https://i.ibb.co/Kp5QSS41/202020-Name20-x-Ltt-Dolo-Bsykw-AEOHWc32vc1-NVFUZi.webp' }
         ];
 
-        let state = {
-            targetCount: 3,
-            selectedCards: [],
-            activeCategory: 'ALL',
-            searchQuery: '',
-            lastRawMarkdown: ''
-        };
+        let state = { targetCount: 3, selectedCards: [], activeCategory: 'ALL', searchQuery: '', lastRawMarkdown: '' };
 
         window.addEventListener('DOMContentLoaded', () => {
-            initSettings();
-            renderSpreadCountButtons();
+            const savedKey = localStorage.getItem('gemini_tarot_api_key') || '';
+            document.getElementById('api-key-input').value = savedKey;
+            updateStatus(savedKey);
+            renderSpreadButtons();
             renderCategoryTabs();
             renderSelectedCards();
             renderDeck();
         });
 
-        function initSettings() {
-            const savedKey = localStorage.getItem('gemini_tarot_api_key') || '';
-            const savedModel = localStorage.getItem('gemini_tarot_model') || 'gemini-1.5-flash';
-            const savedPrompt = localStorage.getItem('gemini_tarot_system_prompt') || DEFAULT_SYSTEM_PROMPT;
-
-            document.getElementById('api-key-input').value = savedKey;
-            document.getElementById('model-select').value = savedModel;
-            document.getElementById('system-prompt-input').value = savedPrompt;
-
-            updateApiStatusBadge(savedKey);
-        }
-
-        function updateApiStatusBadge(key) {
-            const badge = document.getElementById('api-status-badge');
+        function updateStatus(key) {
             const dot = document.getElementById('api-status-dot');
-            const text = document.getElementById('api-status-text');
-
-            if (key && key.trim().length > 10) {
-                badge.className = 'cursor-pointer text-xs px-2.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 flex items-center gap-1.5 transition';
+            const txt = document.getElementById('api-status-text');
+            if(key.length > 5) {
                 dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
-                text.textContent = 'API Hazır';
+                txt.textContent = 'API Hazır';
             } else {
-                badge.className = 'cursor-pointer text-xs px-2.5 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-300 flex items-center gap-1.5 transition animate-pulse';
                 dot.className = 'w-2 h-2 rounded-full bg-rose-500';
-                text.textContent = 'API Anahtarı Gir';
+                txt.textContent = 'API Ayarla';
             }
         }
 
         function openSettings() { document.getElementById('settings-modal').classList.remove('hidden'); }
         function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
-        function resetDefaultPrompt() {
-            document.getElementById('system-prompt-input').value = DEFAULT_SYSTEM_PROMPT;
-            showToast('Sistem talimatı varsayılana döndürüldü.', 'info');
-        }
-
         function saveSettings() {
             const key = document.getElementById('api-key-input').value.trim();
-            const model = document.getElementById('model-select').value;
-            const prompt = document.getElementById('system-prompt-input').value.trim() || DEFAULT_SYSTEM_PROMPT;
-
             localStorage.setItem('gemini_tarot_api_key', key);
-            localStorage.setItem('gemini_tarot_model', model);
-            localStorage.setItem('gemini_tarot_system_prompt', prompt);
-
-            updateApiStatusBadge(key);
+            updateStatus(key);
             closeSettings();
-            showToast('Ayarlar kaydedildi!', 'success');
         }
 
-        function renderSpreadCountButtons() {
-            const container = document.getElementById('spread-count-buttons');
-            container.innerHTML = SPREAD_OPTIONS.map(num => {
-                const isActive = state.targetCount === num;
+        function renderSpreadButtons() {
+            document.getElementById('spread-count-buttons').innerHTML = SPREAD_OPTIONS.map(n => 
+                `<button onclick="state.targetCount=${n}; renderSelectedCards(); renderSpreadButtons();" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold border ${state.targetCount === n ? 'bg-gold-500 text-obsidian border-gold-400' : 'bg-obsidian border-slate-700 text-slate-300'}">${n} Kart</button>`
+            ).join('');
+        }
+
+        function renderCategoryTabs() {
+            document.getElementById('category-tabs').innerHTML = CATEGORIES.map(cat => 
+                `<button onclick="state.activeCategory='${cat.id}'; renderCategoryTabs(); renderDeck();" class="whitespace-nowrap px-3 py-1.5 rounded-xl text-xs border ${state.activeCategory === cat.id ? 'bg-mystic-600/30 border-mystic-500 text-purple-200' : 'bg-obsidian border-slate-800 text-slate-400'}">${cat.label}</button>`
+            ).join('');
+        }
+
+        function filterDeck() {
+            state.searchQuery = document.getElementById('card-search-input').value.trim().toLowerCase();
+            renderDeck();
+        }
+
+        function renderDeck() {
+            const grid = document.getElementById('deck-grid');
+            const filtered = TAROT_DECK.filter(c => {
+                const matchCat = state.activeCategory === 'ALL' || c.category === state.activeCategory;
+                const matchSearch = !state.searchQuery || c.name.toLowerCase().includes(state.searchQuery);
+                return matchCat && matchSearch;
+            });
+
+            grid.innerHTML = filtered.map(c => {
+                const isSelected = state.selectedCards.some(sc => sc.cardId === c.id);
                 return `
-                    <button onclick="setSpreadCount(${num})" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition cursor-pointer ${
-                        isActive 
-                        ? 'bg-gold-500 text-obsidian border-gold-400 shadow-md shadow-gold-500/20' 
-                        : 'bg-obsidian text-slate-300 border-slate-700/80 hover:border-gold-500/50 hover:text-gold-400'
-                    }">
-                        ${num} Kart
+                    <button onclick="addCard('${c.id}')" class="p-3 rounded-xl border flex flex-col justify-between text-left transition ${isSelected ? 'bg-gold-500/15 border-gold-500/60' : 'bg-obsidian border-slate-800 hover:border-gold-500/40'}">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold text-slate-200 truncate">${c.name}</span>
+                            <span class="text-xs ${isSelected ? 'text-gold-400 font-bold' : 'text-slate-500'}">${isSelected ? '✓' : '+'}</span>
+                        </div>
+                        <div class="w-full aspect-[2/3] rounded-lg bg-slate-900 overflow-hidden flex items-center justify-center">
+                            ${c.image ? `<img src="${c.image}" class="w-full h-full object-cover">` : `<span class="text-xl">${c.symbol}</span>`}
+                        </div>
                     </button>
                 `;
             }).join('');
         }
 
-        function setSpreadCount(num) {
-            state.targetCount = num;
-            if (state.selectedCards.length > num) {
-                state.selectedCards = state.selectedCards.slice(0, num);
-                showToast(`Açılım ${num} karta düşürüldüğü için fazla kartlar çıkarıldı.`, 'info');
-            }
-            renderSpreadCountButtons();
-            renderSelectedCards();
-            renderDeck();
-        }
-
-        function addCardToSpread(cardId) {
-            if (state.selectedCards.length >= state.targetCount) {
-                showToast(`Zaten ${state.targetCount} kart seçtin. Yeni kart eklemek için açılım sayısını artır veya masadan bir kart çıkar.`, 'warning');
-                return;
-            }
-
-            const cardObj = TAROT_DECK.find(c => c.id === cardId);
-            if (!cardObj) return;
-
-            if (state.selectedCards.some(c => c.cardId === cardId)) {
-                showToast(`"${cardObj.name}" zaten masada açık.`, 'warning');
-                return;
-            }
-
-            state.selectedCards.push({
-                uid: Date.now() + Math.random(),
-                cardId: cardObj.id,
-                name: cardObj.name,
-                catLabel: cardObj.catLabel,
-                symbol: cardObj.symbol,
-                image: cardObj.image || '',
-                isReversed: false,
-                note: ''
-            });
-
-            renderSelectedCards();
-            renderDeck();
-        }
-
-        function removeCardFromSpread(uid) {
-            state.selectedCards = state.selectedCards.filter(c => c.uid !== uid);
-            renderSelectedCards();
-            renderDeck();
-        }
-
-        function toggleReverseCard(uid) {
-            const target = state.selectedCards.find(c => c.uid === uid);
-            if (target) {
-                target.isReversed = !target.isReversed;
+        function addCard(id) {
+            if(state.selectedCards.length >= state.targetCount) return;
+            const c = TAROT_DECK.find(x => x.id === id);
+            if(c && !state.selectedCards.some(sc => sc.cardId === id)) {
+                state.selectedCards.push({ uid: Math.random(), cardId: c.id, name: c.name, symbol: c.symbol, image: c.image, isReversed: false });
                 renderSelectedCards();
+                renderDeck();
             }
         }
 
-        function updateCardNote(uid, value) {
-            const target = state.selectedCards.find(c => c.uid === uid);
-            if (target) target.note = value;
+        function removeCard(uid) {
+            state.selectedCards = state.selectedCards.filter(sc => sc.uid !== uid);
+            renderSelectedCards();
+            renderDeck();
+        }
+
+        function toggleReverse(uid) {
+            const sc = state.selectedCards.find(x => x.uid === uid);
+            if(sc) { sc.isReversed = !sc.isReversed; renderSelectedCards(); }
         }
 
         function clearSelectedCards() {
             state.selectedCards = [];
             renderSelectedCards();
             renderDeck();
-            showToast('Masa temizlendi.', 'info');
-        }
-
-        function createCardHTML(card, index, widthClass) {
-            const cardMedia = card && card.image 
-                ? `<img src="${card.image}" alt="${card.name}" class="w-full h-full object-cover">`
-                : (card ? `<div class="flex flex-col items-center justify-center p-3 text-center">
-                               <span class="text-3xl sm:text-4xl mb-2 opacity-85">${card.symbol}</span>
-                               <span class="text-[10px] uppercase tracking-widest text-slate-500 font-mystic">Tapprot</span>
-                           </div>` : '');
-
-            if (!card) {
-                return `
-                    <div class="${widthClass} border-2 border-dashed border-slate-800/90 rounded-2xl p-4 flex flex-col items-center justify-center text-center aspect-[2/3.8] bg-obsidian/35">
-                        <span class="w-8 h-8 rounded-full bg-slate-800/70 text-slate-500 text-xs font-bold flex items-center justify-center mb-2">${index + 1}</span>
-                        <p class="text-xs font-medium text-slate-500">Bekleniyor</p>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="${widthClass} relative bg-cardbg border ${card.isReversed ? 'border-amber-500/50 is-reversed' : 'border-gold-500/30'} rounded-2xl p-3 flex flex-col justify-between transition shadow-lg group">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-obsidian text-gold-400 border border-slate-700/70">
-                            ${index + 1}
-                        </span>
-                        <button onclick="removeCardFromSpread(${card.uid})" title="Kartı Kaldır" class="w-6 h-6 rounded-lg bg-obsidian/80 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 flex items-center justify-center text-xs transition">
-                            ✕
-                        </button>
-                    </div>
-
-                    <div class="text-center mb-2 px-0.5">
-                        <h3 class="font-mystic font-bold text-xs sm:text-sm text-slate-100 leading-snug truncate">${card.name}</h3>
-                    </div>
-
-                    <div onclick="toggleReverseCard(${card.uid})" class="cursor-pointer w-full aspect-[2/3.4] rounded-xl bg-obsidian/90 border-2 ${card.isReversed ? 'border-amber-500/60' : 'border-gold-500/40'} hover:border-gold-400 overflow-hidden shadow-inner transition select-none relative">
-                        <div class="card-art-wrapper w-full h-full flex items-center justify-center bg-gradient-to-b from-slate-800/80 to-slate-950">
-                            ${cardMedia}
-                        </div>
-                    </div>
-
-                    <div class="mt-2.5 flex items-center justify-between gap-1">
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg ${card.isReversed ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
-                            ${card.isReversed ? '↻ TERS' : '↑ DÜZ'}
-                        </span>
-                        <button onclick="toggleReverseCard(${card.uid})" class="text-[10px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition font-medium cursor-pointer">
-                            ↻ Çevir
-                        </button>
-                    </div>
-
-                    <input type="text" value="${escapeHtml(card.note)}" oninput="updateCardNote(${card.uid}, this.value)" placeholder="Not..." class="mt-2 w-full bg-obsidian/70 border border-slate-800 focus:border-gold-500/60 rounded-lg px-2 py-1.5 text-[11px] text-slate-300 placeholder-slate-600 outline-none transition">
-                </div>
-            `;
         }
 
         function renderSelectedCards() {
             const container = document.getElementById('selected-cards-container');
-            const counter = document.getElementById('selection-counter');
-            const clearBtn = document.getElementById('clear-table-btn');
-
-            counter.textContent = `${state.selectedCards.length} / ${state.targetCount} Kart`;
-            counter.className = state.selectedCards.length === state.targetCount ? 'text-sm font-bold text-emerald-400' : 'text-sm font-semibold text-gold-400';
-
-            if (state.selectedCards.length > 0) clearBtn.classList.remove('hidden');
-            else clearBtn.classList.add('hidden');
-
-            const slots = [];
-            for (let i = 0; i < state.targetCount; i++) {
-                slots.push(state.selectedCards[i] || null);
-            }
-
+            document.getElementById('selection-counter').textContent = `${state.selectedCards.length} / ${state.targetCount}`;
+            
             let html = '';
-            const tCount = state.targetCount;
-            const standardWidth = 'w-36 sm:w-44';
-
-            if (tCount === 1) {
-                html += `<div class="flex justify-center w-full">${createCardHTML(slots[0], 0, 'w-48 sm:w-56')}</div>`;
-            } 
-            else if (tCount === 3) {
-                html += `<div class="flex flex-wrap justify-center gap-3 sm:gap-4 w-full">`;
-                slots.forEach((card, idx) => { html += createCardHTML(card, idx, standardWidth); });
-                html += `</div>`;
-            } 
-            else if (tCount === 5) {
-                html += `<div class="flex flex-wrap justify-center gap-3 sm:gap-4 w-full">`;
-                for(let i=0; i<3; i++) html += createCardHTML(slots[i], i, standardWidth);
-                html += `</div><div class="flex flex-wrap justify-center gap-3 sm:gap-4 w-full">`;
-                for(let i=3; i<5; i++) html += createCardHTML(slots[i], i, standardWidth);
-                html += `</div>`;
-            } 
-            else if (tCount === 7) {
-                html += `<div class="flex flex-wrap justify-center gap-3 sm:gap-4 w-full">`;
-                for(let i=0; i<4; i++) html += createCardHTML(slots[i], i, standardWidth);
-                html += `</div><div class="flex flex-wrap justify-center gap-3 sm:gap-4 w-full">`;
-                for(let i=4; i<7; i++) html += createCardHTML(slots[i], i, standardWidth);
-                html += `</div>`;
-            } 
-            else if (tCount === 10) {
-                html += `<div class="grid grid-cols-2 sm:grid-cols-5 gap-3 w-full max-w-3xl mx-auto">`;
-                slots.forEach((card, idx) => { html += createCardHTML(card, idx, 'w-full'); });
-                html += `</div>`;
-            } 
-            else if (tCount === 12) {
-                html += `<div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 w-full">`;
-                slots.forEach((card, idx) => { html += createCardHTML(card, idx, 'w-full'); });
-                html += `</div>`;
-            }
-
-            container.innerHTML = html;
-        }
-
-        function renderCategoryTabs() {
-            const container = document.getElementById('category-tabs');
-            container.innerHTML = CATEGORIES.map(cat => {
-                const isActive = state.activeCategory === cat.id;
-                return `
-                    <button onclick="setCategory('${cat.id}')" class="whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-medium border transition cursor-pointer ${
-                        isActive ? 'bg-mystic-600/25 border-mystic-500 text-purple-200 shadow-sm' : 'bg-obsidian border-slate-800 text-slate-400 hover:text-slate-200'
-                    }">
-                        ${cat.label}
-                    </button>
-                `;
-            }).join('');
-        }
-
-        function setCategory(catId) {
-            state.activeCategory = catId;
-            renderCategoryTabs();
-            renderDeck();
-        }
-
-        function filterDeck() {
-            const input = document.getElementById('card-search-input');
-            const clearBtn = document.getElementById('clear-search-btn');
-            state.searchQuery = input.value.trim().toLocaleLowerCase('tr-TR');
-            if (state.searchQuery.length > 0) clearBtn.classList.remove('hidden');
-            else clearBtn.classList.add('hidden');
-            renderDeck();
-        }
-
-        function clearSearch() {
-            document.getElementById('card-search-input').value = '';
-            state.searchQuery = '';
-            document.getElementById('clear-search-btn').classList.add('hidden');
-            renderDeck();
-        }
-
-        function renderDeck() {
-            const deckGrid = document.getElementById('deck-grid');
-            const filtered = TAROT_DECK.filter(card => {
-                const matchesCat = state.activeCategory === 'ALL' || card.category === state.activeCategory;
-                const matchesSearch = !state.searchQuery || card.name.toLocaleLowerCase('tr-TR').includes(state.searchQuery);
-                return matchesCat && matchesSearch;
-            });
-
-            if (filtered.length === 0) {
-                deckGrid.innerHTML = `<div class="col-span-full py-10 text-center text-slate-500 text-sm">Aramana uygun kart bulunamadı.</div>`;
-                return;
-            }
-
-            if (!state.searchQuery) {
-                let groups = [];
-                if (state.activeCategory === 'ALL') {
-                    groups = [
-                        { title: 'Büyük Arkana (22 Kart)', cards: filtered.filter(c => c.category === 'MAJOR') },
-                        { title: 'Değnekler (14 Kart)', cards: filtered.filter(c => c.category === 'WANDS') },
-                        { title: 'Kupalar (14 Kart)', cards: filtered.filter(c => c.category === 'CUPS') },
-                        { title: 'Kılıçlar (14 Kart)', cards: filtered.filter(c => c.category === 'SWORDS') },
-                        { title: 'Tılsımlar (14 Kart)', cards: filtered.filter(c => c.category === 'PENTACLES') }
-                    ];
+            for(let i=0; i<state.targetCount; i++) {
+                const sc = state.selectedCards[i];
+                if(!sc) {
+                    html += `<div class="w-32 h-48 border-2 border-dashed border-slate-800 rounded-xl flex items-center justify-center text-xs text-slate-600">${i+1}. Kart</div>`;
                 } else {
-                    groups = [{ title: '', cards: filtered }];
-                }
-
-                let finalHtml = '';
-                groups.forEach(group => {
-                    if (group.cards.length === 0) return;
-                    if (group.title) {
-                        finalHtml += `<div class="col-span-full pt-4 pb-2 border-b border-slate-800/80 font-mystic text-xs font-bold text-gold-400 tracking-wider">${group.title}</div>`;
-                    }
-
-                    let rows = [];
-                    for (let i = 0; i < group.cards.length; i += 4) {
-                        rows.push(group.cards.slice(i, i + 4));
-                    }
-
-                    rows.forEach((rowCards, rIdx) => {
-                        const isLastRowWithTwo = (rows.length > 1 && rIdx === rows.length - 1 && rowCards.length === 2) || (group.cards.length === 22 && rIdx === 5);
-                        
-                        if (rowCards.length === 4) {
-                            finalHtml += `<div class="col-span-full grid grid-cols-2 sm:grid-cols-4 gap-4">`;
-                            rowCards.forEach(card => finalHtml += renderSingleDeckCard(card));
-                            finalHtml += `</div>`;
-                        } else if (rowCards.length === 2 || isLastRowWithTwo) {
-                            finalHtml += `<div class="col-span-full flex flex-wrap justify-center gap-4">`;
-                            rowCards.forEach(card => finalHtml += `<div class="w-[calc(50%-8px)] sm:w-[calc(25%-12px)]">${renderSingleDeckCard(card, true)}</div>`);
-                            finalHtml += `</div>`;
-                        } else {
-                            finalHtml += `<div class="col-span-full grid grid-cols-2 sm:grid-cols-${rowCards.length} gap-4">`;
-                            rowCards.forEach(card => finalHtml += renderSingleDeckCard(card));
-                            finalHtml += `</div>`;
-                        }
-                    });
-                });
-
-                deckGrid.className = "";
-                deckGrid.innerHTML = finalHtml;
-            } else {
-                deckGrid.className = "grid grid-cols-2 sm:grid-cols-4 gap-4 max-h-[680px] overflow-y-auto pr-1.5";
-                deckGrid.innerHTML = filtered.map(card => renderSingleDeckCard(card)).join('');
-            }
-        }
-
-        function renderSingleDeckCard(card, isCustomWidth = false) {
-            const isSelected = state.selectedCards.some(c => c.cardId === card.id);
-            const cardMedia = card.image 
-                ? `<img src="${card.image}" alt="${card.name}" class="w-full h-full object-cover">`
-                : `<div class="flex flex-col items-center justify-center p-3 text-center">
-                       <span class="text-3xl sm:text-4xl text-gold-400/85 mb-2">${card.symbol}</span>
-                       <span class="text-[10px] uppercase tracking-widest text-slate-500 font-mystic">Tapprot</span>
-                   </div>`;
-
-            return `
-                <button onclick="addCardToSpread('${card.id}')" class="${isCustomWidth ? 'w-full' : ''} p-3 sm:p-4 rounded-2xl border transition flex flex-col justify-between cursor-pointer active:scale-[0.98] text-left group ${
-                    isSelected 
-                    ? 'bg-gold-500/15 border-gold-500/65 shadow-md shadow-gold-500/10' 
-                    : 'bg-obsidian/90 hover:bg-cardbg border-slate-800/90 hover:border-gold-500/40'
-                }">
-                    <div class="w-full flex items-start justify-between gap-2 mb-2.5">
-                        <div class="min-w-0">
-                            <div class="font-mystic text-xs sm:text-sm font-bold leading-snug ${isSelected ? 'text-gold-300' : 'text-slate-100 group-hover:text-gold-400'} transition truncate">
-                                ${card.name}
+                    html += `
+                        <div class="w-36 bg-cardbg border ${sc.isReversed ? 'border-amber-500/50 is-reversed' : 'border-gold-500/40'} rounded-xl p-2.5 flex flex-col justify-between shadow-lg">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[10px] font-bold text-gold-400">#${i+1}</span>
+                                <button onclick="removeCard(${sc.uid})" class="text-xs text-slate-400 hover:text-rose-400">✕</button>
                             </div>
-                            <div class="text-[11px] text-slate-400 mt-0.5">${card.catLabel}</div>
+                            <div class="text-center font-bold text-xs truncate mb-1 text-slate-200">${sc.name}</div>
+                            <div onclick="toggleReverse(${sc.uid})" class="cursor-pointer w-full aspect-[2/3] rounded-lg bg-obsidian overflow-hidden flex items-center justify-center relative">
+                                <div class="card-art-wrapper w-full h-full flex items-center justify-center">
+                                    ${sc.image ? `<img src="${sc.image}" class="w-full h-full object-cover">` : sc.symbol}
+                                </div>
+                            </div>
+                            <div class="mt-2 flex justify-between items-center text-[10px]">
+                                <span class="${sc.isReversed ? 'text-amber-400' : 'text-emerald-400'} font-bold">${sc.isReversed ? 'TERS' : 'DÜZ'}</span>
+                                <button onclick="toggleReverse(${sc.uid})" class="underline text-slate-400 hover:text-white">Çevir</button>
+                            </div>
                         </div>
-                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 border ${
-                            isSelected 
-                            ? 'bg-gold-500 text-obsidian border-gold-400 font-bold' 
-                            : 'bg-slate-800/80 text-slate-400 border-slate-700 group-hover:border-gold-500/50 group-hover:text-gold-400'
-                        }">
-                            ${isSelected ? '✓' : '+'}
-                        </span>
-                    </div>
-
-                    <div class="w-full aspect-[2/3.4] rounded-xl bg-gradient-to-b from-slate-800/70 to-slate-950 border ${isSelected ? 'border-gold-500/50' : 'border-slate-800 group-hover:border-gold-500/30'} overflow-hidden flex items-center justify-center shadow-inner">
-                        ${cardMedia}
-                    </div>
-                </button>
-            `;
+                    `;
+                }
+            }
+            container.innerHTML = html;
         }
 
         async function requestTarotReading() {
             const apiKey = localStorage.getItem('gemini_tarot_api_key')?.trim();
-            if (!apiKey) {
-                showToast('Önce Ayarlar kısmından Gemini API anahtarını girmelisin.', 'warning');
-                openSettings();
-                return;
-            }
-
+            if(!apiKey) { alert('Lütfen Ayarlar kısmından API anahtarınızı girin!'); openSettings(); return; }
+            
             const intention = document.getElementById('intention-input').value.trim();
-            if (!intention) {
-                showToast('Lütfen niyetini yaz.', 'warning');
-                document.getElementById('intention-input').focus();
-                return;
-            }
+            if(!intention) { alert('Lütfen niyetinizi yazın.'); return; }
+            if(state.selectedCards.length === 0) { alert('Lütfen en az bir kart seçin.'); return; }
 
-            if (state.selectedCards.length === 0) {
-                showToast('Masaya hiç kart seçmedin.', 'warning');
-                return;
-            }
+            const loading = document.getElementById('loading-panel');
+            const result = document.getElementById('result-panel');
+            loading.classList.remove('hidden');
+            result.classList.add('hidden');
+            loading.scrollIntoView({ behavior: 'smooth' });
 
-            // GÜNCELLENMİŞ STABİL ENDPOINT YAPISI (v1 sürümü ve gemini-1.5-flash)
-            const model = 'gemini-1.5-flash';
-            const systemInstruction = localStorage.getItem('gemini_tarot_system_prompt') || DEFAULT_SYSTEM_PROMPT;
-
-            const cardsFormatted = state.selectedCards.map((c, idx) => {
-                const orientation = c.isReversed ? 'TERS' : 'DÜZ';
-                const notePart = c.note.trim() ? ` [Pozisyon/Not: ${c.note.trim()}]` : '';
-                return `${idx + 1}. Kart: ${c.name} (${orientation})${notePart}`;
-            }).join('\n');
-
-            const userPrompt = `Niyetim / Sorduğum Soru: "${intention}"
-Açılım Türü: ${state.selectedCards.length} Kartlık Serbest Açılım
-Çektiğim Kartlar:
-${cardsFormatted}
-Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşimleri ve düz/ters enerjileriyle birlikte dürüstçe yorumla.`;
-
-            const btn = document.getElementById('interpret-btn');
-            const loadingPanel = document.getElementById('loading-panel');
-            const resultPanel = document.getElementById('result-panel');
-
-            btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-            resultPanel.classList.add('hidden');
-            loadingPanel.classList.remove('hidden');
-            loadingPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const cardsText = state.selectedCards.map((sc, idx) => `${idx+1}. Kart: ${sc.name} (${sc.isReversed ? 'Ters' : 'Düz'})`).join('\n');
+            const prompt = `Niyetim: "${intention}"\nÇektiğim Kartlar:\n${cardsText}\nLütfen bu kartları niyetim doğrultusunda element dengeleri ve kombinasyonlarıyla dürüstçe yorumla.`;
 
             try {
-                // v1beta yerine resmi v1 kararlı endpoint yapısı kullanıldı
-                const endpoint = `https://generativelanguage.googleapis.com/v1/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
-
-                const response = await fetch(endpoint, {
+                // v1 endpoint ve gemini-1.5-flash kullanarak en stabil istemci isteği
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        systemInstruction: { parts: [{ text: systemInstruction }] },
-                        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-                        generationConfig: { temperature: 0.75, topP: 0.9 }
+                        systemInstruction: { parts: [{ text: DEFAULT_SYSTEM_PROMPT }] },
+                        contents: [{ role: 'user', parts: [{ text: prompt }] }]
                     })
                 });
 
-                const data = await response.json();
-                if (!response.ok) throw new Error(data?.error?.message || 'API isteği başarısız oldu.');
+                const data = await res.json();
+                if(!res.ok) throw new Error(data.error?.message || 'API yanıt vermedi.');
 
-                const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!aiText) throw new Error('Yapay zekadan boş yanıt döndü.');
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if(!text) throw new Error('Yapay zekadan boş yanıt döndü.');
 
-                state.lastRawMarkdown = aiText;
-
-                const cardBadges = state.selectedCards.map((c, i) => 
-                    `<span class="inline-block px-2 py-0.5 rounded bg-cardbg border ${c.isReversed ? 'border-amber-500/40 text-amber-300' : 'border-slate-700 text-slate-200'} mr-1.5 mb-1">
-                        ${i + 1}. ${c.name} (${c.isReversed ? 'Ters' : 'Düz'})
-                    </span>`
-                ).join('');
-
-                document.getElementById('reading-summary-banner').innerHTML = `
-                    <div><strong class="text-gold-400">Niyet:</strong> ${escapeHtml(intention)}</div>
-                    <div class="pt-1"><strong class="text-gold-400">Açılan Kartlar:</strong><br><div class="mt-1">${cardBadges}</div></div>
-                `;
-
-                document.getElementById('reading-output').innerHTML = marked.parse(aiText);
-                loadingPanel.classList.add('hidden');
-                resultPanel.classList.remove('hidden');
-                resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-            } catch (error) {
-                console.error('Tarot API Hatası:', error);
-                loadingPanel.classList.add('hidden');
-                showToast(`Hata: ${error.message}`, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                state.lastRawMarkdown = text;
+                document.getElementById('reading-output').innerHTML = marked.parse(text);
+                loading.classList.add('hidden');
+                result.classList.remove('hidden');
+                result.scrollIntoView({ behavior: 'smooth' });
+            } catch(err) {
+                loading.classList.add('hidden');
+                alert('Hata: ' + err.message);
             }
         }
 
         function copyReading() {
-            if (!state.lastRawMarkdown) return;
-            const textarea = document.createElement('textarea');
-            textarea.value = state.lastRawMarkdown;
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
-                showToast('Yorum kopyalandı!', 'success');
-            } catch (e) {
-                showToast('Kopyalama başarısız.', 'error');
-            }
-            document.body.removeChild(textarea);
-        }
-
-        function resetAllForNewReading() {
-            document.getElementById('intention-input').value = '';
-            state.selectedCards = [];
-            state.lastRawMarkdown = '';
-            document.getElementById('result-panel').classList.add('hidden');
-            renderSelectedCards();
-            renderDeck();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            showToast('Yeni açılım için masa hazırlandı.', 'info');
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const colors = {
-                success: 'bg-emerald-950/95 border-emerald-500/50 text-emerald-200',
-                warning: 'bg-amber-950/95 border-amber-500/50 text-amber-200',
-                error: 'bg-rose-950/95 border-rose-500/50 text-rose-200',
-                info: 'bg-slate-900/95 border-gold-500/40 text-slate-200'
-            };
-            toast.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-xl text-xs sm:text-sm backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 ${colors[type] || colors.info}`;
-            toast.textContent = message;
-            container.appendChild(toast);
-            requestAnimationFrame(() => toast.classList.remove('translate-y-2', 'opacity-0'));
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 300);
-            }, 3800);
+            if(!state.lastRawMarkdown) return;
+            navigator.clipboard.writeText(state.lastRawMarkdown);
+            alert('Yorum kopyalandı!');
         }
     </script>
 </body>
 </html>
-
