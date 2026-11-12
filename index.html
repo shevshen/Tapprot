@@ -829,27 +829,43 @@
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
             resultPanel.classList.add('hidden');
-            loadingTitle.textContent = "Yorum Hazırlanıyor...";
-            loadingSub.textContent = "Hızlı yanıt modu aktif...";
+            loadingTitle.textContent = "Müsait Yapay Zeka Modeli Aranıyor...";
+            loadingSub.textContent = "Yoğun olmayan en hızlı sunucuya bağlanılıyor...";
             loadingPanel.classList.remove('hidden');
+
+            // 1. Adım: API anahtarının erişebildiği tüm güncel modelleri Google'dan çek
+            let availableModels = [];
+            try {
+                const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+                const listData = await listRes.json();
+                if (listData.models) {
+                    availableModels = listData.models
+                        .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+                        .map(m => m.name.replace('models/', ''))
+                        .filter(name => !name.includes('embedding') && !name.includes('vision') && !name.includes('image') && !name.includes('audio'));
+                }
+            } catch (e) {}
+
+            // Yedek model listesi (Müsait olanı bulana kadar sırayla dener)
+            const fallbackModels = ['gemini-3.8-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-pro', 'gemini-3.0-flash', 'gemini-3.8-flash'];
+            const modelsToTry = [...new Set([...fallbackModels, ...availableModels])];
 
             const payload = JSON.stringify({
                 contents: [{
                     parts: [{ text: systemInstruction + "\n\n" + userPrompt }]
                 }],
                 generationConfig: {
-                    maxOutputTokens: 1200,
-                    temperature: 0.7,
-                    thinkingConfig: { thinkingBudget: 0 }
+                    maxOutputTokens: 1400,
+                    temperature: 0.7
                 }
             });
 
-            // Önce en hızlı Lite modeli dener, desteklenmiyorsa standart 3.8-flash'a geçer
-            const modelsToTry = ['gemini-3.8-flash-lite', 'gemini-3.8-flash'];
             let response = null;
             let lastError = null;
 
+            // 2. Adım: Yoğun olmayan ilk çalışan modeli bulduğu an bağlan
             for (const modelName of modelsToTry) {
+                loadingSub.textContent = `Deneniyor: ${modelName}...`;
                 const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
                 try {
                     const res = await fetch(endpoint, {
@@ -863,7 +879,7 @@
                         break;
                     } else {
                         const errData = await res.json().catch(() => ({}));
-                        lastError = new Error(errData?.error?.message || 'API isteği başarısız.');
+                        lastError = new Error(errData?.error?.message || 'Sunucu yanıt vermedi.');
                     }
                 } catch (err) {
                     lastError = err;
@@ -871,7 +887,7 @@
             }
 
             try {
-                if (!response) throw lastError || new Error('Sunucuya bağlanılamadı.');
+                if (!response) throw lastError || new Error('Şu an tüm modeller yoğun, lütfen biraz sonra tekrar deneyin.');
 
                 const cardBadges = state.selectedCards.map((c, i) => {
                     const num = (state.spreadId === '12+1' && i === 12) ? '+1' : (i + 1);
