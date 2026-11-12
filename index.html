@@ -790,7 +790,7 @@
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-       async function requestTarotReading() {
+ async function requestTarotReading() {
             const apiKey = localStorage.getItem('gemini_tarot_api_key')?.trim();
             if (!apiKey) {
                 showToast('Önce Ayarlar kısmından Gemini API anahtarını girmelisin.', 'warning');
@@ -819,14 +819,14 @@
                 return `${posNum}: ${c.name} (${orientation})${notePart}`;
             }).join('\n');
 
-const userPrompt = `Niyetim: "${intention}"
-Açılım Türü: ${state.spreadId === '12+1' ? '12+1 Kartlık Açılım' : state.selectedCards.length + ' Kartlık Açılım'}
+            const userPrompt = `Niyetim: "${intention}"
+Açılım: ${state.spreadId === '12+1' ? '12+1 Kartlık Açılım' : state.selectedCards.length + ' Kartlık Açılım'}
 Çektiğim Kartlar:
 ${cardsFormatted}
 
-Lütfen bu açılımı yüzeysel geçmeden, derinlemesine ve kapsamlı bir şekilde yorumla:
-1. Genel Enerji ve İlk İzlenim (Element dengeleri ve baskın temalar)
-2. Kartların Birbiriyle Etkileşimi ve Kombinasyon Analizi (Düz ve ters kartların birbirini nasıl tetiklediği/engellediği)
+Lütfen bu açılımı net, akıcı ve kapsamlı şekilde yorumla:
+1. Genel Enerji ve Element Dengesi
+2. Kartların Birbiriyle Etkileşimi ve Kombinasyon Analizi
 3. Niyetim Doğrultusunda Net Mesaj ve Tavsiye`;
 
             const btn = document.getElementById('interpret-btn');
@@ -839,41 +839,27 @@ Lütfen bu açılımı yüzeysel geçmeden, derinlemesine ve kapsamlı bir şeki
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
             resultPanel.classList.add('hidden');
-            loadingTitle.textContent = "Müsait Yapay Zeka Modeli Aranıyor...";
-            loadingSub.textContent = "Yoğun olmayan en hızlı sunucuya bağlanılıyor...";
+            loadingTitle.textContent = "Yorum Başlatılıyor...";
+            loadingSub.textContent = "Anında akış moduna bağlanılıyor...";
             loadingPanel.classList.remove('hidden');
-
-            let availableModels = [];
-            try {
-                const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
-                const listData = await listRes.json();
-                if (listData.models) {
-                    availableModels = listData.models
-                        .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
-                        .map(m => m.name.replace('models/', ''))
-                        .filter(name => !name.includes('embedding') && !name.includes('vision') && !name.includes('image') && !name.includes('audio'));
-                }
-            } catch (e) {}
-
-            const fallbackModels = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.8-pro', 'gemini-3.0-flash', 'gemini-3.8-flash-lite'];
-            const modelsToTry = [...new Set([...fallbackModels, ...availableModels])];
 
             const payload = JSON.stringify({
                 contents: [{
                     parts: [{ text: systemInstruction + "\n\n" + userPrompt }]
                 }],
                 generationConfig: {
-                    maxOutputTokens: 8192,
-                    temperature: 0.75
+                    maxOutputTokens: 4096,
+                    temperature: 0.75,
+                    thinkingConfig: { thinkingBudget: 0 }
                 }
             });
 
+            // En hızlı modeller doğrudan denenir, gereksiz liste sorgusu yapılmaz
+            const fastModels = ['gemini-3.8-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-flash'];
             let response = null;
             let lastError = null;
 
-            // 2. Adım: Yoğun olmayan ilk çalışan modeli bulduğu an bağlan
-            for (const modelName of modelsToTry) {
-                loadingSub.textContent = `Deneniyor: ${modelName}...`;
+            for (const modelName of fastModels) {
                 const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
                 try {
                     const res = await fetch(endpoint, {
@@ -895,7 +881,7 @@ Lütfen bu açılımı yüzeysel geçmeden, derinlemesine ve kapsamlı bir şeki
             }
 
             try {
-                if (!response) throw lastError || new Error('Şu an tüm modeller yoğun, lütfen biraz sonra tekrar deneyin.');
+                if (!response) throw lastError || new Error('Sunucu şu an yoğun, birkaç saniye sonra tekrar deneyin.');
 
                 const cardBadges = state.selectedCards.map((c, i) => {
                     const num = (state.spreadId === '12+1' && i === 12) ? '+1' : (i + 1);
