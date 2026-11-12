@@ -48,8 +48,6 @@
 </head>
 <body class="antialiased">
 
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4"></div>
-
     <header class="sticky top-0 z-30 backdrop-blur-md bg-obsidian/80 border-b border-slate-800">
         <div class="max-w-4xl mx-auto px-4 py-3.5 flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -384,16 +382,16 @@
             const prompt = `Niyetim: "${intention}"\nÇektiğim Kartlar:\n${cardsText}\nLütfen bu kartları niyetim doğrultusunda element dengeleri ve kombinasyonlarıyla dürüstçe yorumla.`;
 
             try {
-                // CORS engeline takılmamak için ücretsiz proxy köprüsü kullanıldı
-                const targetUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-                const proxyUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(targetUrl);
+                // Doğrudan Google AI Studio v1beta API endpoint'i ve doğru payload yapısı
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-                const res = await fetch(proxyUrl, {
+                const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        systemInstruction: { parts: [{ text: DEFAULT_SYSTEM_PROMPT }] },
-                        contents: [{ role: 'user', parts: [{ text: prompt }] }]
+                        contents: [{
+                            parts: [{ text: DEFAULT_SYSTEM_PROMPT + "\n\n" + prompt }]
+                        }]
                     })
                 });
 
