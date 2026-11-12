@@ -788,7 +788,7 @@
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-        async function requestTarotReading() {
+       async function requestTarotReading() {
             const apiKey = localStorage.getItem('gemini_tarot_api_key')?.trim();
             if (!apiKey) {
                 showToast('Önce Ayarlar kısmından Gemini API anahtarını girmelisin.', 'warning');
@@ -817,11 +817,7 @@
                 return `${posNum}: ${c.name} (${orientation})${notePart}`;
             }).join('\n');
 
-            const userPrompt = `Niyetim / Sorduğum Soru: "${intention}"
-Açılım Türü: ${state.spreadId === '12+1' ? '12+1 Kartlık Açılım' : state.selectedCards.length + ' Kartlık Açılım'}
-Çektiğim Kartlar:
-${cardsFormatted}
-Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşimleri ve düz/ters enerjileriyle birlikte dürüstçe yorumla.`;
+            const userPrompt = `Niyetim: "${intention}"\nKartlar:\n${cardsFormatted}\nBu kartları kombinasyonları ve düz/ters anlamlarıyla net, akıcı ve gereksiz uzatmadan yorumla.`;
 
             const btn = document.getElementById('interpret-btn');
             const loadingPanel = document.getElementById('loading-panel');
@@ -833,28 +829,28 @@ Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşim
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
             resultPanel.classList.add('hidden');
-            loadingTitle.textContent = "Kartların Enerjisi Okunuyor...";
-            loadingSub.textContent = "Yorum hazırlanıyor, saniyeler içinde akmaya başlayacak...";
+            loadingTitle.textContent = "Yorum Hazırlanıyor...";
+            loadingSub.textContent = "Hızlı yanıt modu aktif...";
             loadingPanel.classList.remove('hidden');
-            loadingPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            // Canlı akış (SSE) endpoint'i - kelimeler üretildikçe anında ekrana düşer
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
-            
             const payload = JSON.stringify({
                 contents: [{
                     parts: [{ text: systemInstruction + "\n\n" + userPrompt }]
                 }],
                 generationConfig: {
-                    thinkingConfig: { thinkingBudget: 0 } // Arka plan beklemesini kapatır, anında yanıt başlatır
+                    maxOutputTokens: 1200,
+                    temperature: 0.7,
+                    thinkingConfig: { thinkingBudget: 0 }
                 }
             });
 
-            const maxRetries = 3;
+            // Önce en hızlı Lite modeli dener, desteklenmiyorsa standart 3.8-flash'a geçer
+            const modelsToTry = ['gemini-3.8-flash-lite', 'gemini-3.8-flash'];
             let response = null;
             let lastError = null;
 
-            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            for (const modelName of modelsToTry) {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
                 try {
                     const res = await fetch(endpoint, {
                         method: 'POST',
@@ -867,17 +863,10 @@ Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşim
                         break;
                     } else {
                         const errData = await res.json().catch(() => ({}));
-                        const errMsg = errData?.error?.message || 'API isteği başarısız oldu.';
-                        if ((res.status === 503 || res.status === 429 || errMsg.toLowerCase().includes('high demand')) && attempt < maxRetries) {
-                            loadingTitle.textContent = `Sunucu Yoğun, Tekrar Bağlanılıyor (${attempt}/${maxRetries - 1})...`;
-                            await sleep(1500);
-                            continue;
-                        }
-                        throw new Error(errMsg);
+                        lastError = new Error(errData?.error?.message || 'API isteği başarısız.');
                     }
                 } catch (err) {
                     lastError = err;
-                    if (attempt === maxRetries) break;
                 }
             }
 
@@ -899,9 +888,7 @@ Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşim
                 loadingPanel.classList.add('hidden');
                 readingOutput.innerHTML = '';
                 resultPanel.classList.remove('hidden');
-                resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-                // Gelen veri akışını kelime kelime ekrana bas
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder('utf-8');
                 let fullMarkdown = '';
@@ -913,7 +900,7 @@ Lütfen bu kartları niyetim doğrultusunda kombinasyonları, element etkileşim
                     buffer += decoder.decode(value, { stream: true });
                     
                     const lines = buffer.split('\n');
-                    buffer = lines.pop(); 
+                    buffer = lines.pop();
 
                     for (const line of lines) {
                         if (line.startsWith('data: ')) {
